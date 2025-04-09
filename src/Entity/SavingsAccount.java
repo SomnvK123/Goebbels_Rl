@@ -1,3 +1,5 @@
+package Entity;
+
 public class SavingsAccount extends BankAccount {
     private double interestRate;
 
@@ -6,12 +8,6 @@ public class SavingsAccount extends BankAccount {
     public SavingsAccount(String accountNumber, String ownerName, double balance, double interestRate) {
         super(accountNumber, ownerName, balance);
         this.interestRate = interestRate;
-    }
-
-    public void applyInterest() {
-        double interest = getBalance() * interestRate;
-        deposit(interest);
-        System.out.println("Interest applied: " + interest);
     }
 
     public double getInterestRate() {
