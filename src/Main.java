@@ -41,6 +41,9 @@ public class Main {
                 case 6:
                     withdrawMoney();
                     break;
+                case 7:
+                    calculateInterest();
+                    break;
                 case 0:
                     System.out.println("End program");
                     return;
@@ -58,6 +61,7 @@ public class Main {
         System.out.println("4. List All Bank Accounts");
         System.out.println("5. Deposit Money");
         System.out.println("6. Withdraw Money");
+        System.out.println("7. Calculate Interest");
         System.out.println("0. Exit");
         System.out.print("Enter your choice: ");
     }
@@ -209,6 +213,7 @@ public class Main {
             String accountNumber = getInput("Enter account number: ");
             //check account number exist
             checkingAccount(accountNumber);
+            banks.displayAccountDetails(accountNumber);
             //find bank account by account number
             BankAccount account = banks.searchBankAccount(accountNumber);
             if (account == null) {
@@ -224,5 +229,23 @@ public class Main {
         }
     }
 
-//    private static void
+    // calculate interest
+    private static void calculateInterest() {
+        try{
+            String accountNumber = getInput("Enter account number: ");
+            checkingAccount(accountNumber);
+            BankAccount account = banks.searchBankAccount(accountNumber);
+            if (account == null) {
+                System.out.println("Account number " + accountNumber + " not found.");
+                return;
+            }
+            System.out.print("Enter months to calculate interest: ");
+            int months = Integer.parseInt(sc.nextLine());
+            SavingsAccount saving = (SavingsAccount) account;
+            double calculate = saving.calculateInterest(months);
+            System.out.print("Enter interest: " + calculate);
+        } catch (Exception e) {
+            System.out.println("Error while calculate: " + e.getMessage());
+        }
+    }
 }

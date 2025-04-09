@@ -10,8 +10,9 @@ public class SavingsAccount extends BankAccount {
         this.interestRate = interestRate;
     }
 
+    // calculate interest
     public double calculateInterest(int months) {
-        return getBalance() *Math.pow(1 + interestRate, months) ;
+        return getBalance() * (Math.pow(1 + interestRate, months) - 1) ;
     }
     // A=P×(1+r) ^n
 
