@@ -16,9 +16,10 @@ public class CheckingAccount extends BankAccount {
             setBalance(getBalance() - amount);
             System.out.println("Withdrawn " + amount + " successfully.");
         } else {
-            System.out.println("Amount exceeds overdraft limit or invalid.");
+            System.out.println("Amount exceeds overdraft limit or invalid. Overdraft limit: " + overdraftLimit );
         }
     }
+
     public double getOverdraftLimit() {
         return overdraftLimit;
     }

@@ -19,16 +19,17 @@ public class BankAccount {
             balance += amount;
             System.out.println("Deposited " + amount + " to " + ownerName);
         } else {
-            System.out.println("Insufficient Funds");
+            System.out.println("Cannot deposit " + amount + " to " + ownerName + " because the amount is negative");
         }
     }
 
+    //withdraw for saving account
     public void withdraw (double amount){
         if (amount >= 0 && amount <= balance) {
             balance -= amount;
             System.out.println("Withdrawn " + amount + " to " + ownerName);
         } else {
-            System.out.println("Insufficient Funds");
+            System.out.println("Can't withdraw " + amount + " from " + ownerName + " because your balance have: " + balance);
         }
     }
 

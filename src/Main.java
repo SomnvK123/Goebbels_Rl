@@ -107,14 +107,17 @@ public class Main {
         return type;
     }
     // check account exist
-    private static void checkingAccount( String accountNumber) {
+    private static void checkingAccount( String accountNumber) throws Exception {
         BankAccount existingAccount = banks.searchBankAccount(accountNumber);
-        if (existingAccount == null) {
-            System.out.println("Account number " + accountNumber + " not found.");
-            return;
-        } else {
-            System.out.println("Account number " + accountNumber + " founded.");
-            banks.displayAccountDetails(accountNumber);
+        if (existingAccount == null ) {
+            throw new Exception("Account number " + accountNumber + " not found.");
+        }
+    }
+
+    private static void checkingAccount1( String accountNumber) throws Exception {
+        BankAccount existingAccount = banks.searchBankAccount(accountNumber);
+        if (existingAccount != null ) {
+            throw new Exception("Account number " + accountNumber + " is already exist.");
         }
     }
     // create account by type
@@ -135,7 +138,7 @@ public class Main {
             // Input data
             String accountNumber = getInput("Enter account number: ");
             // Check if account exists
-            checkingAccount(accountNumber);
+            checkingAccount1(accountNumber);
             // input
             String ownerName = getInput("Enter owner name: ");
             double balance = inputBalance();
@@ -151,6 +154,7 @@ public class Main {
     }
 
     private static void updateBankAccount() {
+        try {
         //input
         String oldAccountNumber = getInput("Enter current account number to update: ");
         //check account exist
@@ -159,7 +163,6 @@ public class Main {
         String newAccountNumber = getInput("Enter new account number: ");
         String newOwnerName = getInput("Enter new owner name: ");
         // update bank account
-        try {
             if (banks.updateBankAccount(oldAccountNumber, newAccountNumber, newOwnerName)) {
                 System.out.println("Bank account updated successfully!");
                 banks.displayAccountDetails(newAccountNumber);
@@ -181,34 +184,45 @@ public class Main {
     }
 
     private static void depositMoney() {
-        String accountNumber = getInput("Enter account number: ");
-        //check account number exist
-        checkingAccount(accountNumber);
-        // find bank account by account number
-        BankAccount account = banks.searchBankAccount(accountNumber);
-        if (account == null) {
-            System.out.println("Account number " + accountNumber + " not found.");
-            return;
+        try {
+            String accountNumber = getInput("Enter account number: ");
+            //check account number exist
+            checkingAccount(accountNumber);
+            banks.displayAccountDetails(accountNumber);
+            // find bank account by account number
+            BankAccount account = banks.searchBankAccount(accountNumber);
+            if (account == null) {
+                System.out.println("Account number " + accountNumber + " not found.");
+                return;
+            }
+            System.out.print("Enter amount to deposit: ");
+            double amount = Double.parseDouble(sc.nextLine());
+            account.deposit(amount);
+            banks.displayAccountDetails(accountNumber); // list account detail
+        } catch (Exception e) {
+            System.out.println("Error while depositing bank account: " + e.getMessage());
         }
-        System.out.print("Enter amount to deposit: ");
-        double amount = Double.parseDouble(sc.nextLine());
-        account.deposit(amount);
-        banks.displayAccountDetails(accountNumber); // list account detail
     }
 
     private static void withdrawMoney() {
-        String accountNumber = getInput("Enter account number: ");
-        //check account number exist
-        checkingAccount(accountNumber);
-        //find bank account by account number
-        BankAccount account = banks.searchBankAccount(accountNumber);
-        if (account == null) {
-            System.out.println("Account number " + accountNumber + " not found.");
-            return;
+        try {
+            String accountNumber = getInput("Enter account number: ");
+            //check account number exist
+            checkingAccount(accountNumber);
+            //find bank account by account number
+            BankAccount account = banks.searchBankAccount(accountNumber);
+            if (account == null) {
+                System.out.println("Account number " + accountNumber + " not found.");
+                return;
+            }
+            System.out.print("Enter amount to withdraw: ");
+            double amount = Double.parseDouble(sc.nextLine());
+            account.withdraw(amount);
+            banks.displayAccountDetails(accountNumber);
+        } catch (Exception e) {
+            System.out.println("Error while withdrawing bank account: " + e.getMessage());
         }
-        System.out.print("Enter amount to withdraw: ");
-        double amount = Double.parseDouble(sc.nextLine());
-        account.withdraw(amount);
-        banks.displayAccountDetails(accountNumber);
     }
+
+//    private static void
 }
