@@ -62,11 +62,11 @@ public class Main {
         System.out.print("Enter your choice: ");
     }
 
+    // input
     private static String getInput(String prompt) {
         System.out.print(prompt);
         return sc.nextLine().trim();
     }
-
     private static double inputBalance() {
         double balance;
         while (true) {
@@ -84,7 +84,7 @@ public class Main {
         }
         return balance;
     }
-
+    // input account type: saving account || checking account
     private static int inputAccountType() {
         // Choose account type
         System.out.println("Choose account type:");
@@ -106,8 +106,7 @@ public class Main {
         }
         return type;
     }
-
-    //check account exist
+    // check account exist
     private static void checkingAccount( String accountNumber) {
         BankAccount existingAccount = banks.searchBankAccount(accountNumber);
         if (existingAccount == null) {
@@ -118,7 +117,7 @@ public class Main {
             banks.displayAccountDetails(accountNumber);
         }
     }
-
+    // create account by type
     private static BankAccount createAccountByType(int type, String ownerName, double balance, String accountNumber) {
         if (type == 1) {
             System.out.print("Enter interest rate (/month): ");
@@ -172,7 +171,6 @@ public class Main {
         }
     }
 
-
     private static void deleteBankAccount() {
         String accountNumber = getInput("Enter account number to delete: ");
         if (banks.deleteBankAccount(accountNumber)) {
@@ -184,16 +182,14 @@ public class Main {
 
     private static void depositMoney() {
         String accountNumber = getInput("Enter account number: ");
-
         //check account number exist
         checkingAccount(accountNumber);
         // find bank account by account number
-        BankAccount account = banks.findBankAccount(accountNumber);
+        BankAccount account = banks.searchBankAccount(accountNumber);
         if (account == null) {
             System.out.println("Account number " + accountNumber + " not found.");
             return;
         }
-
         System.out.print("Enter amount to deposit: ");
         double amount = Double.parseDouble(sc.nextLine());
         account.deposit(amount);
@@ -201,22 +197,18 @@ public class Main {
     }
 
     private static void withdrawMoney() {
-        System.out.print("Enter account number: ");
-        String accountNumber = sc.nextLine();
-
+        String accountNumber = getInput("Enter account number: ");
         //check account number exist
         checkingAccount(accountNumber);
         //find bank account by account number
-        BankAccount account = banks.findBankAccount(accountNumber);
+        BankAccount account = banks.searchBankAccount(accountNumber);
         if (account == null) {
             System.out.println("Account number " + accountNumber + " not found.");
             return;
         }
-
         System.out.print("Enter amount to withdraw: ");
         double amount = Double.parseDouble(sc.nextLine());
         account.withdraw(amount);
         banks.displayAccountDetails(accountNumber);
     }
-
 }

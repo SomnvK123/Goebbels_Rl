@@ -141,13 +141,4 @@ public class BankManager {
             }
             return null;
         }
-
-    public BankAccount findBankAccount(String accountNumber) {
-        for (BankAccount bank : banks) {
-            if (bank.getAccountNumber().equals(accountNumber)) {
-                return bank;
-            }
-        }
-        return null;
-    }
 }
