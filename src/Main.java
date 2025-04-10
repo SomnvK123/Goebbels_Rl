@@ -117,13 +117,36 @@ public class Main {
             throw new Exception("Account number " + accountNumber + " not found.");
         }
     }
-
+    // check account exist for add bank account
     private static void checkingAccount1( String accountNumber) throws Exception {
         BankAccount existingAccount = banks.searchBankAccount(accountNumber);
         if (existingAccount != null ) {
             throw new Exception("Account number " + accountNumber + " is already exist.");
         }
     }
+    //check exist: kiem tra new account number co ton tai chua nhung khong trung voi old number
+    private static void checkingAccount2(String oldAccountNumber, String newAccountNumber) {
+        boolean exist = banks.getBanks().stream().anyMatch(bank ->
+                !bank.getAccountNumber().equals(oldAccountNumber)
+                        && bank.getAccountNumber().equals(newAccountNumber));
+        if (exist) {
+            System.out.println("⚠️  New account number already exists.");
+        }
+    }
+    //while true
+    private static String checkAccountinWhile() {
+        while (true) {
+            String accountNumber = getInput("Enter account number: ");
+            try {
+                // Check if account exists
+                checkingAccount(accountNumber);
+                return accountNumber;
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
     // create account by type
     private static BankAccount createAccountByType(int type, String ownerName, double balance, String accountNumber) {
         if (type == 1) {
@@ -140,9 +163,17 @@ public class Main {
     private static void addBankAccount() {
         try {
             // Input data
-            String accountNumber = getInput("Enter account number: ");
-            // Check if account exists
-            checkingAccount1(accountNumber);
+            String accountNumber;
+            while (true) {
+                accountNumber = getInput("Enter account number: ");
+                try {
+                    // Check if account exists
+                    checkingAccount1(accountNumber);
+                    break;
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+            }
             // input
             String ownerName = getInput("Enter owner name: ");
             double balance = inputBalance();
@@ -159,14 +190,22 @@ public class Main {
 
     private static void updateBankAccount() {
         try {
-        //input
-        String oldAccountNumber = getInput("Enter current account number to update: ");
-        //check account exist
-        checkingAccount(oldAccountNumber);
-        //input
-        String newAccountNumber = getInput("Enter new account number: ");
-        String newOwnerName = getInput("Enter new owner name: ");
-        // update bank account
+            String oldAccountNumber = getInput("Enter current account number to update: ");
+            checkingAccount(oldAccountNumber);
+
+            String newAccountNumber;
+            while (true) {
+                newAccountNumber = getInput("Enter new account number: ");
+                try {
+                    checkingAccount2(oldAccountNumber, newAccountNumber); // kiem tra trung
+                    break;
+                } catch (Exception e) {
+                    System.out.println(e.getMessage()); // in thông báo trùng
+                }
+            }
+
+            String newOwnerName = getInput("Enter new owner name: ");
+
             if (banks.updateBankAccount(oldAccountNumber, newAccountNumber, newOwnerName)) {
                 System.out.println("Bank account updated successfully!");
                 banks.displayAccountDetails(newAccountNumber);
@@ -179,7 +218,7 @@ public class Main {
     }
 
     private static void deleteBankAccount() {
-        String accountNumber = getInput("Enter account number to delete: ");
+        String accountNumber = checkAccountinWhile();
         if (banks.deleteBankAccount(accountNumber)) {
             System.out.println("Bank account deleted successfully!");
         } else {

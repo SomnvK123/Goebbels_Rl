@@ -6,6 +6,7 @@ import Entity.SavingsAccount;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class BankManager {
     private static final List<BankAccount> banks = new ArrayList<BankAccount>();
@@ -15,36 +16,19 @@ public class BankManager {
         };
 
     public boolean updateBankAccount(String oldAccountNumber, String newAccountNumber, String newOwnerName) {
-        // Check account number exist
-        for (BankAccount bank : banks) {
-            if (bank.getAccountNumber().equals(newAccountNumber) && !bank.getAccountNumber().equals(oldAccountNumber)) {
-                System.out.println("New account number already exists.");
-                return false;
-            }
+        //update:
+        Optional<BankAccount> bankAccount = banks.stream().filter(bank
+                -> bank.getAccountNumber().equals(oldAccountNumber)).findFirst();
+        if (bankAccount.isPresent()) {
+            bankAccount.get().setAccountNumber(newAccountNumber);
+            bankAccount.get().setOwnerName(newOwnerName);
         }
-
-        // update information
-        for (BankAccount bank : banks) {
-            if (bank.getAccountNumber().equals(oldAccountNumber)) {
-                bank.setAccountNumber(newAccountNumber);
-                bank.setOwnerName(newOwnerName);
-                return true;
-            }
-        }
-
-        return false;
+        return true;
     }
 
-
     public boolean deleteBankAccount(String accountNumber) {
-            for (BankAccount bank : banks) {
-                if (bank.getAccountNumber().equals(accountNumber)) {
-                    banks.remove(bank);
-                    return true;
-                }
-            }
-            return false;
-        }
+        return banks.removeIf(bank -> bank.getAccountNumber().equals(accountNumber));
+    }
 
     public void listBankAccounts() {
         if (banks.isEmpty()) {
@@ -61,7 +45,7 @@ public class BankManager {
         printWithDelay(headerMid, 2);
         printWithDelay(headerSep, 2);
 
-        for (BankAccount bank : banks) {
+        banks.forEach(bank -> {
             String type = "Basic Account";
             String extra = "N/A";
 
@@ -81,7 +65,7 @@ public class BankManager {
                     extra
             );
             printWithDelay(row, 2);
-        }
+        });
 
         printWithDelay(footerLine, 2);
     }
@@ -134,11 +118,11 @@ public class BankManager {
     }
 
     public BankAccount searchBankAccount(String accountNumber) {
-            for (BankAccount bank : banks) {
-                if (bank.getAccountNumber().equals(accountNumber)) {
-                    return bank;
-                }
-            }
-            return null;
+        return banks.stream().filter(bank
+                -> bank.getAccountNumber().equals(accountNumber)).findFirst().orElse(null);
+    }
+
+    public static List<BankAccount> getBanks() {
+        return banks;
     }
 }
