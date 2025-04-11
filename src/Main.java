@@ -302,42 +302,19 @@ public class Main {
 
     // transfer money
     private static void transferMoneyMain() {
-        String fromAccountNumber;
-        BankAccount fromAccount = null;
+        String fromAccountNumber = getValidAccount("Enter account number to transfer from: ", true);
+        BankAccount fromAccount = banks.searchBankAccount(fromAccountNumber);
 
-        while (true) {
-            fromAccountNumber = getInput("Enter account number to transfer from: ");
-            try {
-                checkingAccount(fromAccountNumber);
-                fromAccount = banks.searchBankAccount(fromAccountNumber);
-                System.out.println("From: " + fromAccountNumber + " | Owner: " + fromAccount.getOwnerName());
-                break;
-            } catch (AccountNotFoundException e) {
-                String error = ("Account number of sender " + fromAccountNumber
-                        + " does not exist. Please enter again.");
-                System.out.println(error);
-                Filelog.logError(error + " Exception: " + e.getMessage());
-            }
-        }
+        String toAccountNumber = getValidAccount("Enter account number to transfer to: ", false);
+        BankAccount toAccount = banks.searchBankAccount(toAccountNumber);
 
-        String toAccountNumber;
-        BankAccount toAccount = null;
+        double amount = getValidTransferAmount(fromAccount);
 
-        while (true) {
-            toAccountNumber = getInput("Enter account number to transfer to: ");
-            try {
-                checkingAccount(toAccountNumber);
-                toAccount = banks.searchBankAccount(toAccountNumber);
-                System.out.println("To: " + toAccountNumber + " | Owner: " + toAccount.getOwnerName());
-                break;
-            } catch (AccountNotFoundException e) {
-                String error = ("Account number of receiver " + toAccountNumber
-                        + " does not exist. Please enter again.");
-                System.out.println(error);
-                Filelog.logError(error + " Exception: " + e.getMessage());
-            }
-        }
+        executeTransfer(fromAccount, toAccount, amount);
+    }
 
+    // check money transfer valid
+    private static double getValidTransferAmount(BankAccount fromAccount) {
         double amount = 0;
         while (true) {
             System.out.print("Enter amount to transfer: ");
@@ -349,49 +326,62 @@ public class Main {
                 } else if (fromAccount.getBalance() < amount) {
                     throw new InsufficientFundsException(
                             "The amount you are trying to transfer exceeds your account balance: Sender: "
-                                    + fromAccountNumber + "Fullname: " + fromAccount.getOwnerName() + " | Amount: "
-                                    + amount);
+                                    + fromAccount.getAccountNumber() + " Fullname: " + fromAccount.getOwnerName()
+                                    + " | Amount: " + amount);
                 } else {
-                    break;
+                    return amount;
                 }
-            } catch (InvalidAmountException | InsufficientFundsException e) {
+            } catch (InvalidAmountException | InsufficientFundsException | NumberFormatException e) {
                 System.out.println("Error " + e.getMessage());
                 Filelog.logError("Invalid amount: " + e.getMessage());
             }
         }
+    }
 
-        boolean success = false;
-        String message = "";
-
+    // log transfer && log error
+    private static void executeTransfer(BankAccount fromAccount, BankAccount toAccount, double amount) {
         try {
-            banks.transferMoney(fromAccountNumber, toAccountNumber, amount);
-            // Log transaction
+            banks.transferMoney(fromAccount.getAccountNumber(), toAccount.getAccountNumber(), amount);
             Filelog.logTransaction(String.format(
                     "Transfer $%.2f from [%s - %s] to [%s - %s]",
                     amount,
-                    fromAccountNumber,
+                    fromAccount.getAccountNumber(),
                     fromAccount.getOwnerName(),
-                    toAccountNumber,
+                    toAccount.getAccountNumber(),
                     toAccount.getOwnerName()));
-
             System.out.println("✅ Transfer successful!");
-
         } catch (InsufficientFundsException | InvalidAmountException | AccountNotFoundException
                 | SameAccountTransferException e) {
             System.out.println("Error while transferring money: " + e.getMessage());
-            // Log error
             Filelog.logError(String.format(
                     "Transfer failed from [%s - %s] to [%s - %s]: %s",
-                    fromAccountNumber,
+                    fromAccount.getAccountNumber(),
                     fromAccount.getOwnerName(),
-                    toAccountNumber,
+                    toAccount.getAccountNumber(),
                     toAccount.getOwnerName(),
                     e.getMessage()));
-        } finally {
-            if (success) {
-                Filelog.logTransaction(message);
-            } else {
-                Filelog.logError(message);
+        }
+    }
+
+    // check account valid
+    private static String getValidAccount(String prompt, boolean isSender) {
+        String accountNumber;
+        BankAccount account = null;
+
+        while (true) {
+            accountNumber = getInput(prompt);
+            try {
+                checkingAccount(accountNumber);
+                account = banks.searchBankAccount(accountNumber);
+                System.out.println(
+                        (isSender ? "From" : "To") + ": " + accountNumber + " | Owner: " + account.getOwnerName());
+                return accountNumber;
+            } catch (AccountNotFoundException e) {
+                String role = isSender ? "sender" : "receiver";
+                String error = "Account number of " + role + " " + accountNumber
+                        + " does not exist. Please enter again.";
+                System.out.println(error);
+                Filelog.logError(error + " Exception: " + e.getMessage());
             }
         }
     }
