@@ -1,0 +1,5 @@
+2025-04-11T14:09:48.608874100: Transfer from 1 to 2: $10.0
+2025-04-11T14:20:06.149928100: Transfer $40.00 from [1 - himmler] to [3 - kaiser]
+2025-04-11T14:20:45.583443800: Transfer $1000.00 from [1 - himmler] to [3 - kaiser]
+2025-04-11T14:25:26.552983600: Transfer $1000.00 from [1 - himmler] to [3 - kaiser]
+2025-04-11T14:30:00.150720400: Transfer $1000.00 from [1 - himmler] to [2 - kaiser]

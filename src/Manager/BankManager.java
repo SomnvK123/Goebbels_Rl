@@ -10,11 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BankManager {
-        private static Map<String, BankAccount> banks = new HashMap<>();;
+    private static Map<String, BankAccount> banks = new HashMap<>();;
 
     public void addBankAccount(BankAccount bank) {
-            banks.put(bank.getAccountNumber(), bank);
-        };
+        banks.put(bank.getAccountNumber(), bank);
+    };
 
     public boolean updateBankAccount(String oldAccountNumber, String newAccountNumber, String newOwnerName) {
         // Check account number exist
@@ -25,7 +25,7 @@ public class BankManager {
         if (banks.containsKey(newAccountNumber) && !newAccountNumber.equals(oldAccountNumber)) {
             System.out.println("New account number already exists.");
             return false;
-        }        
+        }
 
         // update information
         BankAccount bank = banks.remove(oldAccountNumber);
@@ -36,12 +36,12 @@ public class BankManager {
     }
 
     public boolean deleteBankAccount(String accountNumber) {
-            if (banks.containsKey(accountNumber)) {
-                banks.remove(accountNumber);
-                return true;
-            }
-            return false;
+        if (banks.containsKey(accountNumber)) {
+            banks.remove(accountNumber);
+            return true;
         }
+        return false;
+    }
 
     public void listBankAccounts() {
         if (banks.isEmpty()) {
@@ -52,7 +52,7 @@ public class BankManager {
         String headerTop = "╔══════════════════════╦═════════════════════════╦══════════════╦═════════════════════╦════════════════════════════════════╗";
         String headerMid = "║ Account Number       ║ Owner Name              ║ Balance      ║ Account Type        ║ Extra Info                         ║";
         String headerSep = "╠══════════════════════╬═════════════════════════╬══════════════╬═════════════════════╬════════════════════════════════════╣";
-        String footerLine ="╚══════════════════════╩═════════════════════════╩══════════════╩═════════════════════╩════════════════════════════════════╝";
+        String footerLine = "╚══════════════════════╩═════════════════════════╩══════════════╩═════════════════════╩════════════════════════════════════╝";
 
         printWithDelay(headerTop, 2);
         printWithDelay(headerMid, 2);
@@ -75,8 +75,7 @@ public class BankManager {
                     bank.getOwnerName(),
                     bank.getBalance(),
                     type,
-                    extra
-            );
+                    extra);
             printWithDelay(row, 2);
         }
 
@@ -122,11 +121,11 @@ public class BankManager {
         System.out.println("╔════════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║                             🌟 ACCOUNT DETAILS 🌟                                 ║");
         System.out.println("╠════════════════════════════════════════════════════════════════════════════════════╣");
-        System.out.printf ("║ %-20s : %-50s ║\n", "Account Number", account.getAccountNumber());
-        System.out.printf ("║ %-20s : %-50s ║\n", "Owner Name", account.getOwnerName());
-        System.out.printf ("║ %-20s : $%-49.2f ║\n", "Balance", account.getBalance());
-        System.out.printf ("║ %-20s : %-50s ║\n", "Account Type", type);
-        System.out.printf ("║ %-20s : %-50s ║\n", "Extra Info", extra);
+        System.out.printf("║ %-20s : %-50s ║\n", "Account Number", account.getAccountNumber());
+        System.out.printf("║ %-20s : %-50s ║\n", "Owner Name", account.getOwnerName());
+        System.out.printf("║ %-20s : $%-49.2f ║\n", "Balance", account.getBalance());
+        System.out.printf("║ %-20s : %-50s ║\n", "Account Type", type);
+        System.out.printf("║ %-20s : %-50s ║\n", "Extra Info", extra);
         System.out.println("╚════════════════════════════════════════════════════════════════════════════════════╝");
     }
 
@@ -134,7 +133,7 @@ public class BankManager {
         if (banks.containsKey(accountNumber)) {
             return banks.get(accountNumber);
         }
-            return null;
+        return null;
     }
 
     public static BankAccount findBankAccount(String accountNumber) throws AccountNotFoundException {
@@ -145,32 +144,29 @@ public class BankManager {
         return account;
     }
 
-    public static void transferMoney(String fromAccountNumber, String toAccountNumber, double amount) throws InsufficientFundsException, AccountNotFoundException, InvalidAmountException {
-        BankAccount from = null;
-        BankAccount to = null;
-        
-        try {
-            from = findBankAccount(fromAccountNumber);
-            to = findBankAccount(toAccountNumber);
+    public static void transferMoney(String fromAccountNumber, String toAccountNumber, double amount)
+            throws InsufficientFundsException, AccountNotFoundException, InvalidAmountException {
 
-            if (from == null || to == null) {
-                throw new AccountNotFoundException("One of the accounts was not found.");
-            }
-            if (from.getBalance() < amount) {
-                throw new InsufficientFundsException("Insufficient funds in account: " + fromAccountNumber);
-            }
-            from.withdraw(amount);
-            to.deposit(amount);
-            System.out.println("Transfered " + amount + " from " + fromAccountNumber + " to " + toAccountNumber);
-        } catch (AccountNotFoundException | InsufficientFundsException | InvalidAmountException e) {
-            System.out.println(e.getMessage());
-        } finally {
-            if (from != null) {
-                banks.put(from.getAccountNumber(), from);
-            }
-            if (to != null) {
-                banks.put(to.getAccountNumber(), to);
-            }
+        BankAccount from = findBankAccount(fromAccountNumber);
+        BankAccount to = findBankAccount(toAccountNumber);
+
+        if (from == null || to == null) {
+            throw new AccountNotFoundException("Account not found: " + fromAccountNumber);
         }
+        if (amount <= 0) {
+            throw new InvalidAmountException("Amount must be greater than 0.");
+        }
+        if (from.getBalance() < amount) {
+            throw new InsufficientFundsException("Insufficient funds in account: " + fromAccountNumber);
+        }
+
+        // Thực hiện chuyển tiền
+        from.withdraw(amount);
+        to.deposit(amount);
+
+        // Cập nhật lại vào danh sách account nếu cần (nếu dùng HashMap)
+        banks.put(from.getAccountNumber(), from);
+        banks.put(to.getAccountNumber(), to);
     }
+
 }
