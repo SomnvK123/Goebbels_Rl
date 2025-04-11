@@ -1,5 +1,8 @@
 package Manager;
 
+import CustomeException.AccountNotFoundException;
+import CustomeException.InsufficientFundsException;
+import CustomeException.InvalidAmountException;
 import Entity.BankAccount;
 import Entity.CheckingAccount;
 import Entity.SavingsAccount;
@@ -134,6 +137,40 @@ public class BankManager {
             return null;
     }
 
-    // public 
+    public static BankAccount findBankAccount(String accountNumber) throws AccountNotFoundException {
+        BankAccount account = banks.get(accountNumber);
+        if (account == null) {
+            throw new AccountNotFoundException("Account not found: " + accountNumber);
+        }
+        return account;
+    }
 
+    public static void transferMoney(String fromAccountNumber, String toAccountNumber, double amount) throws InsufficientFundsException, AccountNotFoundException, InvalidAmountException {
+        BankAccount from = null;
+        BankAccount to = null;
+        
+        try {
+            from = findBankAccount(fromAccountNumber);
+            to = findBankAccount(toAccountNumber);
+
+            if (from == null || to == null) {
+                throw new AccountNotFoundException("One of the accounts was not found.");
+            }
+            if (from.getBalance() < amount) {
+                throw new InsufficientFundsException("Insufficient funds in account: " + fromAccountNumber);
+            }
+            from.withdraw(amount);
+            to.deposit(amount);
+            System.out.println("Transfered " + amount + " from " + fromAccountNumber + " to " + toAccountNumber);
+        } catch (AccountNotFoundException | InsufficientFundsException | InvalidAmountException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            if (from != null) {
+                banks.put(from.getAccountNumber(), from);
+            }
+            if (to != null) {
+                banks.put(to.getAccountNumber(), to);
+            }
+        }
+    }
 }

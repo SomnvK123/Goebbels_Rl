@@ -43,6 +43,9 @@ public class Main {
                 case 7:
                     calculateInterest();
                     break;
+                case 8:
+                    transferMoneyMain();
+                    break;
                 case 0:
                     System.out.println("End program");
                     return;
@@ -61,6 +64,7 @@ public class Main {
         System.out.println("5. Deposit Money");
         System.out.println("6. Withdraw Money");
         System.out.println("7. Calculate Interest");
+        System.out.println("8. Transfer Money");
         System.out.println("0. Exit");
         System.out.print("Enter your choice: ");
     }
@@ -277,6 +281,21 @@ public class Main {
             System.out.print("Enter interest: " + calculate);
         } catch (Exception e) {
             System.out.println("Error while calculate: " + e.getMessage());
+        }
+    }
+    // transfer money
+    private static void transferMoneyMain() {
+        try {
+            String fromAccountNumber = getInput("Enter account number to transfer from: ");
+            String toAccountNumber = getInput("Enter account number to transfer to: ");
+            //check account number exist
+            checkingAccount(fromAccountNumber);
+            checkingAccount(toAccountNumber);
+            System.out.print("Enter amount to transfer: ");
+            double amount = Double.parseDouble(sc.nextLine());
+            banks.transferMoney(fromAccountNumber, toAccountNumber, amount);
+        } catch (Exception e) {
+            System.out.println("Error while transfer money: " + e.getMessage());
         }
     }
 }
