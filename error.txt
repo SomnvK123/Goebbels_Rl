@@ -20,3 +20,13 @@
 2025-04-11T15:52:59.024431700: 
 2025-04-11T15:59:26.621365500: Account number 2 does not exist. Please enter again. Exception: Account number 2 not found.
 2025-04-11T16:15:44.218735800: Invalid amount: Insufficient funds in account: 1
+2025-04-11T16:51:05.989477700: Invalid amount: The amount you are trying to transfer exceeds your account balance: 1
+2025-04-11T16:51:18.923842300: Invalid amount: Amount must be greater than 0.
+2025-04-11T16:51:21.183373900: Invalid amount: Amount must be greater than 0.
+2025-04-11T17:22:12.753006: 
+2025-04-11T17:22:38.299927400: Account number of sender 3 does not exist. Please enter again. Exception: Account number 3 not found.
+2025-04-11T17:22:54.651791800: Account number of receiver 3 does not exist. Please enter again. Exception: Account number 3 not found.
+2025-04-11T17:23:03.203264800: Invalid amount: Error: himmlerAmount must be greater than 0.
+2025-04-11T17:23:17.138073: Invalid amount: Error: himmlerAmount must be greater than 0.
+2025-04-11T17:23:20.908641300: Invalid amount: The amount you are trying to transfer exceeds your account balance: 1
+2025-04-11T17:23:49.437603: 

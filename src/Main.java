@@ -344,10 +344,13 @@ public class Main {
             try {
                 amount = Double.parseDouble(sc.nextLine());
                 if (amount <= 0) {
-                    throw new InvalidAmountException("Amount must be greater than 0.");
+                    throw new InvalidAmountException(
+                            "Error: Sender: " + fromAccount.getOwnerName() + " Amount must be greater than 0.");
                 } else if (fromAccount.getBalance() < amount) {
                     throw new InsufficientFundsException(
-                            "The amount you are trying to transfer exceeds your account balance: " + fromAccountNumber);
+                            "The amount you are trying to transfer exceeds your account balance: Sender: "
+                                    + fromAccountNumber + "Fullname: " + fromAccount.getOwnerName() + " | Amount: "
+                                    + amount);
                 } else {
                     break;
                 }
