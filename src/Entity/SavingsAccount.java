@@ -1,5 +1,7 @@
 package Entity;
 
+import CustomeException.InvalidAmountException;
+
 public class SavingsAccount extends BankAccount {
     private double interestRate;
 
@@ -19,8 +21,13 @@ public class SavingsAccount extends BankAccount {
     // apply interest to account
     public void applyInterest(int months) {
         double interest = calculateInterest(months);
-        deposit(interest);
+        try {
+            deposit(interest);
+        } catch (InvalidAmountException e) {
+            System.out.println("❌ Không thể cộng lãi suất: " + e.getMessage());
+        }
     }
+
 
     public double getInterestRate() {
         return interestRate;

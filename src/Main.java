@@ -2,7 +2,6 @@ import Entity.BankAccount;
 import Entity.CheckingAccount;
 import Entity.SavingsAccount;
 import Manager.BankManager;
-
 import java.util.Scanner;
 
 public class Main {
@@ -65,7 +64,6 @@ public class Main {
         System.out.println("0. Exit");
         System.out.print("Enter your choice: ");
     }
-
     // input
     private static String getInput(String prompt) {
         System.out.print(prompt);
@@ -117,13 +115,23 @@ public class Main {
             throw new Exception("Account number " + accountNumber + " not found.");
         }
     }
-
+    // check account exist: use for add bank account
     private static void checkingAccount1( String accountNumber) throws Exception {
         BankAccount existingAccount = banks.searchBankAccount(accountNumber);
         if (existingAccount != null ) {
             throw new Exception("Account number " + accountNumber + " is already exist.");
         }
     }
+    // check account number for update
+    private static void checkingAccountForUpdate(String oldAccountNumber, String newAccountNumber) throws Exception {
+        checkingAccount(oldAccountNumber); // Kiểm tra oldAccountNumber có tồn tại không
+        // Nếu newAccountNumber khác old và đã tồn tại, báo lỗi
+        if (!newAccountNumber.equals(oldAccountNumber) &&
+            banks.searchBankAccount(newAccountNumber) != null) {
+            throw new Exception("New account number already exists.");
+        }
+    }
+    
     // create account by type
     private static BankAccount createAccountByType(int type, String ownerName, double balance, String accountNumber) {
         if (type == 1) {
@@ -136,13 +144,20 @@ public class Main {
             return new CheckingAccount(accountNumber, ownerName, balance, limit);
         }
     }
-
+    // add bank account
     private static void addBankAccount() {
         try {
             // Input data
-            String accountNumber = getInput("Enter account number: ");
-            // Check if account exists
-            checkingAccount1(accountNumber);
+            String accountNumber;
+            while (true) {
+                accountNumber = getInput("Enter account number: ");
+                try {
+                    checkingAccount1(accountNumber);
+                    break;
+                } catch (Exception e) {
+                    System.out.println("Account number " + accountNumber + " is already exist. Please enter again.");
+                }               
+            }
             // input
             String ownerName = getInput("Enter owner name: ");
             double balance = inputBalance();
@@ -156,15 +171,32 @@ public class Main {
             System.out.println("Error while adding bank account: " + e.getMessage());
         }
     }
-
+    // update bank account
     private static void updateBankAccount() {
         try {
         //input
-        String oldAccountNumber = getInput("Enter current account number to update: ");
-        //check account exist
-        checkingAccount(oldAccountNumber);
+        String oldAccountNumber;
+        while (true) {
+            oldAccountNumber = getInput("Enter current account number to update: ");
+            try {
+                //check account number exist
+                checkingAccount(oldAccountNumber);
+                break;
+            } catch (Exception e) {
+                System.out.println("Account number " + oldAccountNumber + " is not exist. Please enter again.");
+            }
+        }
         //input
-        String newAccountNumber = getInput("Enter new account number: ");
+        String newAccountNumber;
+        while (true) {
+            newAccountNumber = getInput("Enter new account number: ");
+            try {
+                checkingAccountForUpdate(oldAccountNumber, newAccountNumber);
+                break;
+            } catch (Exception e) {
+                System.out.println("Account number " + newAccountNumber + " is already exist. Please enter again.");
+            }
+        }
         String newOwnerName = getInput("Enter new owner name: ");
         // update bank account
             if (banks.updateBankAccount(oldAccountNumber, newAccountNumber, newOwnerName)) {
@@ -177,7 +209,7 @@ public class Main {
             System.out.println("Error while updating bank account: " + e.getMessage());
         }
     }
-
+    // delete bank account
     private static void deleteBankAccount() {
         String accountNumber = getInput("Enter account number to delete: ");
         if (banks.deleteBankAccount(accountNumber)) {
@@ -186,7 +218,7 @@ public class Main {
             System.out.println("Bank account not found.");
         }
     }
-
+    // deposit money
     private static void depositMoney() {
         try {
             String accountNumber = getInput("Enter account number: ");
@@ -207,7 +239,7 @@ public class Main {
             System.out.println("Error while depositing bank account: " + e.getMessage());
         }
     }
-
+    // withdraw money
     private static void withdrawMoney() {
         try {
             String accountNumber = getInput("Enter account number: ");
@@ -228,7 +260,6 @@ public class Main {
             System.out.println("Error while withdrawing bank account: " + e.getMessage());
         }
     }
-
     // calculate interest
     private static void calculateInterest() {
         try{

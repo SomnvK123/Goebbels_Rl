@@ -1,5 +1,8 @@
 package Entity;
 
+import CustomeException.InsufficientFundsException;
+import CustomeException.InvalidAmountException;
+
 public class BankAccount {
     private String accountNumber;
     private String ownerName;
@@ -14,7 +17,10 @@ public class BankAccount {
     }
 
     //deposit
-    public void deposit (double amount){
+    public void deposit (double amount) throws InvalidAmountException {
+        if (amount <= 0) {
+            throw new InvalidAmountException("Số tiền gửi phải lớn hơn 0");
+        }
         if (amount >= 0) {
             balance += amount;
             System.out.println("Deposited " + amount + " to " + ownerName);
@@ -23,15 +29,19 @@ public class BankAccount {
         }
     }
 
-    //withdraw for saving account
-    public void withdraw (double amount){
-        if (amount >= 0 && amount <= balance) {
-            balance -= amount;
-            System.out.println("Withdrawn " + amount + " to " + ownerName);
-        } else {
-            System.out.println("Can't withdraw " + amount + " from " + ownerName + " because your balance have: " + balance);
-        }
+// Withdraw for saving account
+public void withdraw(double amount) throws InsufficientFundsException, InvalidAmountException {
+    if (amount <= 0) {
+        throw new InvalidAmountException("Số tiền rút phải lớn hơn 0");
     }
+
+    if (amount > balance) {
+        throw new InsufficientFundsException("Không thể rút " + amount + " từ tài khoản của " + ownerName + ". Số dư hiện tại: " + balance);
+    }
+
+    balance -= amount;
+    System.out.println("Đã rút " + amount + " từ tài khoản của " + ownerName);
+}
 
     public String getAccountNumber() {
         return accountNumber;

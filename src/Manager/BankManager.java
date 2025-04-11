@@ -3,45 +3,39 @@ package Manager;
 import Entity.BankAccount;
 import Entity.CheckingAccount;
 import Entity.SavingsAccount;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BankManager {
-    private static final List<BankAccount> banks = new ArrayList<BankAccount>();
+        private static Map<String, BankAccount> banks = new HashMap<>();;
 
     public void addBankAccount(BankAccount bank) {
-            banks.add(bank);
+            banks.put(bank.getAccountNumber(), bank);
         };
 
     public boolean updateBankAccount(String oldAccountNumber, String newAccountNumber, String newOwnerName) {
         // Check account number exist
-        for (BankAccount bank : banks) {
-            if (bank.getAccountNumber().equals(newAccountNumber) && !bank.getAccountNumber().equals(oldAccountNumber)) {
-                System.out.println("New account number already exists.");
-                return false;
-            }
+        if (!banks.containsKey(oldAccountNumber)) {
+            System.out.println("Old account number not found.");
+            return false;
         }
+        if (banks.containsKey(newAccountNumber) && !newAccountNumber.equals(oldAccountNumber)) {
+            System.out.println("New account number already exists.");
+            return false;
+        }        
 
         // update information
-        for (BankAccount bank : banks) {
-            if (bank.getAccountNumber().equals(oldAccountNumber)) {
-                bank.setAccountNumber(newAccountNumber);
-                bank.setOwnerName(newOwnerName);
-                return true;
-            }
-        }
-
-        return false;
+        BankAccount bank = banks.remove(oldAccountNumber);
+        bank.setAccountNumber(newAccountNumber);
+        bank.setOwnerName(newOwnerName);
+        banks.put(newAccountNumber, bank);
+        return true;
     }
 
-
     public boolean deleteBankAccount(String accountNumber) {
-            for (BankAccount bank : banks) {
-                if (bank.getAccountNumber().equals(accountNumber)) {
-                    banks.remove(bank);
-                    return true;
-                }
+            if (banks.containsKey(accountNumber)) {
+                banks.remove(accountNumber);
+                return true;
             }
             return false;
         }
@@ -55,13 +49,13 @@ public class BankManager {
         String headerTop = "╔══════════════════════╦═════════════════════════╦══════════════╦═════════════════════╦════════════════════════════════════╗";
         String headerMid = "║ Account Number       ║ Owner Name              ║ Balance      ║ Account Type        ║ Extra Info                         ║";
         String headerSep = "╠══════════════════════╬═════════════════════════╬══════════════╬═════════════════════╬════════════════════════════════════╣";
-        String footerLine = "╚══════════════════════╩═════════════════════════╩══════════════╩═════════════════════╩════════════════════════════════════╝";
+        String footerLine ="╚══════════════════════╩═════════════════════════╩══════════════╩═════════════════════╩════════════════════════════════════╝";
 
         printWithDelay(headerTop, 2);
         printWithDelay(headerMid, 2);
         printWithDelay(headerSep, 2);
 
-        for (BankAccount bank : banks) {
+        for (BankAccount bank : banks.values()) {
             String type = "Basic Account";
             String extra = "N/A";
 
@@ -110,12 +104,12 @@ public class BankManager {
         String type;
         String extra;
 
-        if (account instanceof SavingsAccount) {
+        if (account instanceof SavingsAccount savingsAccount) {
             type = "Savings Account";
-            extra = "Interest Rate: " + ((SavingsAccount) account).getInterestRate() + " / month";
-        } else if (account instanceof CheckingAccount) {
+            extra = "Interest Rate: " + savingsAccount.getInterestRate() + " / month";
+        } else if (account instanceof CheckingAccount checkingAccount) {
             type = "Checking Account";
-            extra = "Overdraft Limit: $" + ((CheckingAccount) account).getOverdraftLimit();
+            extra = "Overdraft Limit: $" + checkingAccount.getOverdraftLimit();
         } else {
             type = "Basic Account";
             extra = "N/A";
@@ -134,11 +128,12 @@ public class BankManager {
     }
 
     public BankAccount searchBankAccount(String accountNumber) {
-            for (BankAccount bank : banks) {
-                if (bank.getAccountNumber().equals(accountNumber)) {
-                    return bank;
-                }
-            }
+        if (banks.containsKey(accountNumber)) {
+            return banks.get(accountNumber);
+        }
             return null;
     }
+
+    // public 
+
 }
