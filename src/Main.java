@@ -1,6 +1,7 @@
 import CustomeException.AccountNotFoundException;
 import CustomeException.InsufficientFundsException;
 import CustomeException.InvalidAmountException;
+import CustomeException.SameAccountTransferException;
 import Entity.BankAccount;
 import Entity.CheckingAccount;
 import Entity.SavingsAccount;
@@ -121,10 +122,10 @@ public class Main {
     }
 
     // check account exist
-    private static void checkingAccount(String accountNumber) throws Exception {
+    private static void checkingAccount(String accountNumber) throws AccountNotFoundException {
         BankAccount existingAccount = banks.searchBankAccount(accountNumber);
         if (existingAccount == null) {
-            throw new Exception("Account number " + accountNumber + " not found.");
+            throw new AccountNotFoundException("Account number " + accountNumber + " not found.");
         }
     }
 
@@ -311,8 +312,11 @@ public class Main {
                 fromAccount = banks.searchBankAccount(fromAccountNumber);
                 System.out.println("From: " + fromAccountNumber + " | Owner: " + fromAccount.getOwnerName());
                 break;
-            } catch (Exception e) {
-                System.out.println("❌ Account number " + fromAccountNumber + " does not exist. Please enter again.");
+            } catch (AccountNotFoundException e) {
+                String error = ("Account number of sender " + fromAccountNumber
+                        + " does not exist. Please enter again.");
+                System.out.println(error);
+                Filelog.logError(error + " Exception: " + e.getMessage());
             }
         }
 
@@ -326,8 +330,11 @@ public class Main {
                 toAccount = banks.searchBankAccount(toAccountNumber);
                 System.out.println("To: " + toAccountNumber + " | Owner: " + toAccount.getOwnerName());
                 break;
-            } catch (Exception e) {
-                System.out.println("❌ Account number " + toAccountNumber + " does not exist. Please enter again.");
+            } catch (AccountNotFoundException e) {
+                String error = ("Account number of receiver " + toAccountNumber
+                        + " does not exist. Please enter again.");
+                System.out.println(error);
+                Filelog.logError(error + " Exception: " + e.getMessage());
             }
         }
 
@@ -338,12 +345,15 @@ public class Main {
                 amount = Double.parseDouble(sc.nextLine());
                 if (amount <= 0) {
                     throw new InvalidAmountException("Amount must be greater than 0.");
+                } else if (fromAccount.getBalance() < amount) {
+                    throw new InsufficientFundsException(
+                            "The amount you are trying to transfer exceeds your account balance: " + fromAccountNumber);
+                } else {
+                    break;
                 }
-                break;
-            } catch (NumberFormatException e) {
-                System.out.println("❌ Invalid number format. Please enter a valid amount.");
-            } catch (InvalidAmountException e) {
-                System.out.println("❌ " + e.getMessage());
+            } catch (InvalidAmountException | InsufficientFundsException e) {
+                System.out.println("Error " + e.getMessage());
+                Filelog.logError("Invalid amount: " + e.getMessage());
             }
         }
 
@@ -363,8 +373,9 @@ public class Main {
 
             System.out.println("✅ Transfer successful!");
 
-        } catch (InsufficientFundsException | InvalidAmountException | AccountNotFoundException e) {
-            System.out.println("❌ Error while transferring money: " + e.getMessage());
+        } catch (InsufficientFundsException | InvalidAmountException | AccountNotFoundException
+                | SameAccountTransferException e) {
+            System.out.println("Error while transferring money: " + e.getMessage());
             // Log error
             Filelog.logError(String.format(
                     "Transfer failed from [%s - %s] to [%s - %s]: %s",

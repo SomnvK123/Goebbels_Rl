@@ -2,13 +2,15 @@ package Entity;
 
 import CustomeException.InsufficientFundsException;
 import CustomeException.InvalidAmountException;
+import Utils.Filelog;
 
 public class BankAccount {
     private String accountNumber;
     private String ownerName;
     private double balance;
 
-    public BankAccount() {};
+    public BankAccount() {
+    };
 
     public BankAccount(String accountNumber, String ownerName, double balance) {
         this.accountNumber = accountNumber;
@@ -16,8 +18,8 @@ public class BankAccount {
         this.balance = balance;
     }
 
-    //deposit
-    public void deposit (double amount) throws InvalidAmountException {
+    // deposit
+    public void deposit(double amount) throws InvalidAmountException {
         if (amount <= 0) {
             throw new InvalidAmountException("Số tiền gửi phải lớn hơn 0");
         }
@@ -29,19 +31,26 @@ public class BankAccount {
         }
     }
 
-// Withdraw for saving account
-public void withdraw(double amount) throws InsufficientFundsException, InvalidAmountException {
-    if (amount <= 0) {
-        throw new InvalidAmountException("Số tiền rút phải lớn hơn 0");
-    }
+    // Withdraw for saving account
+    public void withdraw(double amount) throws InsufficientFundsException, InvalidAmountException {
+        if (amount <= 0) {
+            String message = "Số tiền rút phải lớn hơn 0";
+            Filelog.logError("Withdraw failed for [" + accountNumber + " - " + ownerName + "]: " + message);
+            throw new InvalidAmountException(message);
+        }
 
-    if (amount > balance) {
-        throw new InsufficientFundsException("Không thể rút " + amount + " từ tài khoản của " + ownerName + ". Số dư hiện tại: " + balance);
-    }
+        if (amount > balance) {
+            String message = "Không thể rút " + amount + " từ tài khoản của " + ownerName + ". Số dư hiện tại: "
+                    + balance;
+            Filelog.logError("Withdraw failed for [" + accountNumber + " - " + ownerName + "]: " + message);
+            throw new InsufficientFundsException(message);
+        }
 
-    balance -= amount;
-    System.out.println("Đã rút " + amount + " từ tài khoản của " + ownerName);
-}
+        balance -= amount;
+        String successMessage = "Đã rút " + amount + " từ tài khoản [" + accountNumber + " - " + ownerName + "]";
+        System.out.println(successMessage);
+        Filelog.logTransaction(successMessage);
+    }
 
     public String getAccountNumber() {
         return accountNumber;
@@ -59,7 +68,7 @@ public void withdraw(double amount) throws InsufficientFundsException, InvalidAm
         this.ownerName = ownerName;
     }
 
-    //get blance
+    // get blance
     public double getBalance() {
         return balance;
     }

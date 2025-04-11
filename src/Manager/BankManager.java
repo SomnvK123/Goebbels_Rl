@@ -3,9 +3,11 @@ package Manager;
 import CustomeException.AccountNotFoundException;
 import CustomeException.InsufficientFundsException;
 import CustomeException.InvalidAmountException;
+import CustomeException.SameAccountTransferException;
 import Entity.BankAccount;
 import Entity.CheckingAccount;
 import Entity.SavingsAccount;
+import Utils.Filelog;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -145,28 +147,44 @@ public class BankManager {
     }
 
     public static void transferMoney(String fromAccountNumber, String toAccountNumber, double amount)
-            throws InsufficientFundsException, AccountNotFoundException, InvalidAmountException {
+            throws InsufficientFundsException, AccountNotFoundException, InvalidAmountException,
+            SameAccountTransferException {
 
         BankAccount from = findBankAccount(fromAccountNumber);
         BankAccount to = findBankAccount(toAccountNumber);
 
-        if (from == null || to == null) {
-            throw new AccountNotFoundException("Account not found: " + fromAccountNumber);
+        if (fromAccountNumber.equals(toAccountNumber)) {
+            String message = "Cannot transfer money to the same account.";
+            Filelog.logError("Transfer failed: " + message);
+            throw new SameAccountTransferException(message);
         }
+
         if (amount <= 0) {
-            throw new InvalidAmountException("Amount must be greater than 0.");
+            String message = "Amount must be greater than 0.";
+            Filelog.logError(
+                    "Transfer failed from [" + fromAccountNumber + "] to [" + toAccountNumber + "]: " + message);
+            throw new InvalidAmountException(message);
         }
+
         if (from.getBalance() < amount) {
-            throw new InsufficientFundsException("Insufficient funds in account: " + fromAccountNumber);
+            String message = "Insufficient funds in account: " + fromAccountNumber;
+            Filelog.logError("Transfer failed from [" + fromAccountNumber + " - " + from.getOwnerName() + "] to ["
+                    + toAccountNumber + " - " + to.getOwnerName() + "]: " + message);
+            throw new InsufficientFundsException(message);
         }
 
-        // Thực hiện chuyển tiền
-        from.withdraw(amount);
-        to.deposit(amount);
+        from.withdraw(amount); // withdraw đã có log bên trong
+        to.deposit(amount); // bạn có thể thêm log trong deposit nếu muốn
 
-        // Cập nhật lại vào danh sách account nếu cần (nếu dùng HashMap)
         banks.put(from.getAccountNumber(), from);
         banks.put(to.getAccountNumber(), to);
-    }
 
+        Filelog.logTransaction(String.format(
+                "Transfer $%.2f from [%s - %s] to [%s - %s]",
+                amount,
+                fromAccountNumber,
+                from.getOwnerName(),
+                toAccountNumber,
+                to.getOwnerName()));
+    }
 }
