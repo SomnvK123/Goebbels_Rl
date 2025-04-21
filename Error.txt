@@ -1,0 +1,14 @@
+[2025-04-17 08:09:02] Transfer failed from [2 - kaiser] to [1 - himmler]: Account not found: 2
+[2025-04-17 08:09:38] Transfer failed from [1 - himmler] to [2 - kaiser]: Account not found: 1
+[2025-04-17 08:11:50] Transfer failed from [1 - himmler] to [2 - kaiser]: Account not found: 1
+[2025-04-17 08:17:08] Transfer failed from [1 - himmler] to [2 - kaiser]: Account not found: 1
+2025-04-17T08:23:00.193146: Transfer failed from [1 - himmler] to [2 - kaiser]: Account not found: 1
+[2025-04-17 08:35:43] Transfer failed from [1 - himmler] to [2 - kaiser]: Account not found: 1
+[2025-04-17 08:38:25] Transfer failed from [1 - himmler] to [2 - kaiser]: Account not found: 1
+[2025-04-17 08:59:17] Transfer failed from [1 - himmelr] to [2 - kaiserr]: Account not found: 1
+[2025-04-17 09:00:33] Transfer failed from [1 - himlerr] to [2 - kaiserr]: Account not found: 1
+[2025-04-17 17:31:17] Errpr: Amount must be greater than 0..
+[2025-04-17 17:31:19] Errpr: Withdrawing money with an amount greater than the balance.
+[2025-04-17 17:35:38] Account number 3 not found.
+[2025-04-17 17:35:44] Errpr: Amount must be greater than 0..
+[2025-04-17 17:35:52] Errpr: Withdrawing money with an amount greater than the balance.

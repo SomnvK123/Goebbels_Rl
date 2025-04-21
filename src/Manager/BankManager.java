@@ -1,128 +1,127 @@
 package Manager;
 
-import Entity.BankAccount;
-import Entity.CheckingAccount;
-import Entity.SavingsAccount;
+import Entity.*;
+import Exception.*;
+import Validate.FileLogger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class BankManager {
-    private static final List<BankAccount> banks = new ArrayList<BankAccount>();
+    private static final Map<String, BankAccount> bankAccounts = new HashMap<>();
 
-    public void addBankAccount(BankAccount bank) {
-            banks.add(bank);
-        };
+    public synchronized void addBankAccount(BankAccount bankAccount) {
+        bankAccounts.put(bankAccount.getAccountNumber(), bankAccount);
+    }
 
-    public boolean updateBankAccount(String oldAccountNumber, String newAccountNumber, String newOwnerName) {
-        //update:
-        Optional<BankAccount> bankAccount = banks.stream().filter(bank
-                -> bank.getAccountNumber().equals(oldAccountNumber)).findFirst();
-        if (bankAccount.isPresent()) {
-            bankAccount.get().setAccountNumber(newAccountNumber);
-            bankAccount.get().setOwnerName(newOwnerName);
+    public synchronized boolean updateBankAccount(String oldAccountNumber, String newAccountNumber, String newOwnerName) {
+        // Check trùng số tài khoản mới
+        if (bankAccounts.containsKey(newAccountNumber) && !oldAccountNumber.equals(newAccountNumber)) {
+            System.out.println("New account number already exists.");
+            return false;
         }
-        return true;
+
+        BankAccount account = bankAccounts.remove(oldAccountNumber);
+        if (account != null) {
+            account.setAccountNumber(newAccountNumber);
+            account.setOwnerName(newOwnerName);
+            bankAccounts.put(newAccountNumber, account);
+            return true;
+        }
+
+        return false;
     }
 
-    public boolean deleteBankAccount(String accountNumber) {
-        return banks.removeIf(bank -> bank.getAccountNumber().equals(accountNumber));
+    public synchronized boolean removeBankAccount(String accountNumber) {
+        if (bankAccounts.containsKey(accountNumber)) {
+            bankAccounts.remove(accountNumber);
+            return true;
+        }
+        return false;
     }
 
-    public void listBankAccounts() {
-        if (banks.isEmpty()) {
-            System.out.println("⚠️  No bank accounts found.");
+    public void printBankAccounts() {
+        if (bankAccounts.isEmpty()) {
+            System.out.println("No bank accounts found!");
             return;
         }
 
-        String headerTop = "╔══════════════════════╦═════════════════════════╦══════════════╦═════════════════════╦════════════════════════════════════╗";
-        String headerMid = "║ Account Number       ║ Owner Name              ║ Balance      ║ Account Type        ║ Extra Info                         ║";
-        String headerSep = "╠══════════════════════╬═════════════════════════╬══════════════╬═════════════════════╬════════════════════════════════════╣";
-        String footerLine = "╚══════════════════════╩═════════════════════════╩══════════════╩═════════════════════╩════════════════════════════════════╝";
+        // In tiêu đề bảng
+        System.out.printf("%-18s %-15s %-20s %-12s %-25s%n",
+                "Account Type", "Account No.", "Owner", "Balance", "Details");
+        System.out.println("-----------------------------------------------------------------------------------------");
 
-        printWithDelay(headerTop, 2);
-        printWithDelay(headerMid, 2);
-        printWithDelay(headerSep, 2);
-
-        banks.forEach(bank -> {
-            String type = "Basic Account";
-            String extra = "N/A";
-
-            if (bank instanceof SavingsAccount) {
-                type = "Savings Account";
-                extra = "Interest Rate: " + ((SavingsAccount) bank).getInterestRate() + " / month";
-            } else if (bank instanceof CheckingAccount) {
-                type = "Checking Account";
-                extra = "Overdraft Limit: $" + ((CheckingAccount) bank).getOverdraftLimit();
-            }
-
-            String row = String.format("║ %-20s ║ %-23s ║ $%-11.2f ║ %-19s ║ %-32s ║",
-                    bank.getAccountNumber(),
-                    bank.getOwnerName(),
-                    bank.getBalance(),
-                    type,
-                    extra
-            );
-            printWithDelay(row, 2);
-        });
-
-        printWithDelay(footerLine, 2);
-    }
-
-    // In từng dòng với hiệu ứng gõ phím
-    private void printWithDelay(String text, int delayMillis) {
-        for (char c : text.toCharArray()) {
-            System.out.print(c);
-            try {
-                Thread.sleep(delayMillis); // delay nhỏ giữa mỗi ký tự
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+        // In từng tài khoản
+        for (BankAccount bank : bankAccounts.values()) {
+            if (bank instanceof SavingsAccount sa) {
+                System.out.printf("%-18s %-15s %-20s %-12.2f %-25s%n",
+                        "Savings Account", bank.getAccountNumber(), bank.getOwnerName(),
+                        bank.getBalance(), "Interest Rate: " + String.format("%.2f", sa.getInterestRate()));
+            } else if (bank instanceof CheckingAccount ca) {
+                System.out.printf("%-18s %-15s %-20s %-12.2f %-25s%n",
+                        "Checking Account", bank.getAccountNumber(), bank.getOwnerName(),
+                        bank.getBalance(), "Overdraft Limit: " + String.format("%.2f", ca.getOverdraftLimit()));
             }
         }
-        System.out.println();
-    }
-
-    public void displayAccountDetails(String accountNumber) {
-        BankAccount account = searchBankAccount(accountNumber);
-        if (account == null) {
-            System.out.println("⚠️  Account number " + accountNumber + " not found.");
-            return;
-        }
-
-        // Chuẩn bị dữ liệu
-        String type;
-        String extra;
-
-        if (account instanceof SavingsAccount) {
-            type = "Savings Account";
-            extra = "Interest Rate: " + ((SavingsAccount) account).getInterestRate() + " / month";
-        } else if (account instanceof CheckingAccount) {
-            type = "Checking Account";
-            extra = "Overdraft Limit: $" + ((CheckingAccount) account).getOverdraftLimit();
-        } else {
-            type = "Basic Account";
-            extra = "N/A";
-        }
-
-        // In giao diện mô phỏng UI
-        System.out.println("╔════════════════════════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                             🌟 ACCOUNT DETAILS 🌟                                 ║");
-        System.out.println("╠════════════════════════════════════════════════════════════════════════════════════╣");
-        System.out.printf ("║ %-20s : %-50s ║\n", "Account Number", account.getAccountNumber());
-        System.out.printf ("║ %-20s : %-50s ║\n", "Owner Name", account.getOwnerName());
-        System.out.printf ("║ %-20s : $%-49.2f ║\n", "Balance", account.getBalance());
-        System.out.printf ("║ %-20s : %-50s ║\n", "Account Type", type);
-        System.out.printf ("║ %-20s : %-50s ║\n", "Extra Info", extra);
-        System.out.println("╚════════════════════════════════════════════════════════════════════════════════════╝");
     }
 
     public BankAccount searchBankAccount(String accountNumber) {
-        return banks.stream().filter(bank
-                -> bank.getAccountNumber().equals(accountNumber)).findFirst().orElse(null);
+        return bankAccounts.get(accountNumber);
     }
 
-    public static List<BankAccount> getBanks() {
-        return banks;
+    public static BankAccount findBankAccount(String accountNumber) throws AccountNotFoundException {
+        BankAccount account = bankAccounts.get(accountNumber);
+        if (account == null) {
+            throw new AccountNotFoundException("Account not found: " + accountNumber);
+        }
+        return account;
+    }
+
+    public void displayAccountDetails(String accountNumber) throws AccountNotFoundException {
+        BankAccount account = searchBankAccount(accountNumber);
+        if (account == null) {
+            System.out.println("Account number: " + accountNumber + " not exist.");
+            return;
+        }
+
+        System.out.printf("%-18s %-15s %-20s %-12s %-25s%n",
+                "Type", "Account No.", "Owner", "Balance", "Extra Info");
+        System.out.println("-------------------------------------------------------------------");
+
+        if (account instanceof SavingsAccount sa) {
+            System.out.printf("%-18s %-15s %-20s %-12.2f %-25s%n",
+                    "Savings Account", account.getAccountNumber(), account.getOwnerName(),
+                    account.getBalance(), "Interest Rate: " + String.format("%.2f", sa.getInterestRate()));
+        } else if (account instanceof CheckingAccount ca) {
+            System.out.printf("%-18s %-15s %-20s %-12.2f %-25s%n",
+                    "Checking Account", account.getAccountNumber(), account.getOwnerName(),
+                    account.getBalance(), "Overdraft Limit: " + String.format("%.2f", ca.getOverdraftLimit()));
+        }
+    }
+
+    public static void transferMoney(String fromAccountNumber, String toAccountNumber, double amount)
+            throws InsufficientFundsException, AccountNotFoundException, InvalidAmountException {
+
+        BankAccount from = findBankAccount(fromAccountNumber);
+        BankAccount to = findBankAccount(toAccountNumber);
+
+        if (amount <= 0) {
+            String message = "Amount must be greater than 0.";
+            FileLogger.errorLog("Transfer failed from [" + fromAccountNumber + "] to [" + toAccountNumber + "]: " + message);
+            throw new InvalidAmountException(message);
+        }
+
+        if (from.getBalance() < amount) {
+            String message = "Insufficient funds in account: " + fromAccountNumber;
+            FileLogger.errorLog("Transfer failed from [" + fromAccountNumber + " - " + from.getOwnerName() + "] to [" +
+                    toAccountNumber + " - " + to.getOwnerName() + "]: " + message);
+            throw new InsufficientFundsException(message);
+        }
+
+        synchronized (from) {
+            synchronized (to) {
+                from.withdraw(amount);
+                to.deposit(amount);
+            }
+        }
     }
 }
